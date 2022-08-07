@@ -1,5 +1,4 @@
-use clap::{arg, value_parser, AppSettings, ArgAction, ArgGroup, Command};
-use std::path::PathBuf;
+use clap::{arg, AppSettings, ArgAction, ArgGroup, Command};
 
 mod analyze;
 mod convert;

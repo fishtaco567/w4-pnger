@@ -1,8 +1,4 @@
-use std::{
-    fs::File,
-    io::BufReader,
-    path::{Iter, PathBuf},
-};
+use std::fs::File;
 
 use glob::{glob, Paths};
 use png::{Decoder, Reader};
@@ -37,7 +33,7 @@ impl Iterator for PngStream {
 
         match Decoder::new(file).read_info() {
             Ok(r) => Some(Ok(r)),
-            Err(e) => return Some(Err(anyhow!(e))),
+            Err(e) => Some(Err(anyhow!(e))),
         }
     }
 }

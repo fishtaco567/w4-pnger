@@ -1,12 +1,10 @@
-use std::path::PathBuf;
-
 pub struct Analyzer<'a> {
     path: &'a str,
 }
 
 impl<'a> Analyzer<'a> {
     pub fn new(path: &'a str) -> Self {
-        Analyzer { path: path }
+        Analyzer { path }
     }
 
     pub fn run(self) {}

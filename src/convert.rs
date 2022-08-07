@@ -8,10 +8,10 @@ pub struct Converter<'a> {
 impl<'a> Converter<'a> {
     pub fn new(path: &'a str, name: &'a str, out_type: OutputType, compress: bool) -> Self {
         Converter {
-            path: path,
-            name: name,
-            out_type: out_type,
-            compress: compress,
+            path,
+            name,
+            out_type,
+            compress,
         }
     }
 
