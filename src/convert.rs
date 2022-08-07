@@ -1,14 +1,12 @@
-use std::path::PathBuf;
-
 pub struct Converter<'a> {
-    path: &'a PathBuf,
+    path: &'a str,
     name: &'a str,
     out_type: OutputType,
     compress: bool,
 }
 
 impl<'a> Converter<'a> {
-    pub fn new(path: &'a PathBuf, name: &'a str, out_type: OutputType, compress: bool) -> Self {
+    pub fn new(path: &'a str, name: &'a str, out_type: OutputType, compress: bool) -> Self {
         Converter {
             path: path,
             name: name,
@@ -17,9 +15,7 @@ impl<'a> Converter<'a> {
         }
     }
 
-    pub fn run(self) {
-
-    }
+    pub fn run(self) {}
 }
 
 pub enum OutputType {
