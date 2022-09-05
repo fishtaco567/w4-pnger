@@ -1,3 +1,10 @@
+use png::Reader;
+use std::fs::File;
+use std::io::{BufWriter, Write};
+
+use crate::pngstream::PngStream;
+use crate::wasm4png::W4Sprite;
+
 pub struct Converter<'a> {
     path: &'a str,
     name: &'a str,
@@ -15,12 +22,71 @@ impl<'a> Converter<'a> {
         }
     }
 
-    pub fn run(self) {}
+    pub fn run(self) {
+        let stream = PngStream::new(self.path);
+
+        for png_res in stream {
+            match png_res {
+                Ok((name, png)) => self.process_png(name, png),
+                Err(e) => eprintln!("{}, continuing with other files", e),
+            }
+        }
+    }
+
+    fn process_png(&self, image_name: String, png_reader: Reader<File>) {
+        let mut png_reader = png_reader;
+        match W4Sprite::from_reader(&mut png_reader) {
+            Ok(png) => match self.out_type {
+                OutputType::Rust => {}
+                OutputType::Raw => {
+                    let out_name = self.name.to_owned() + "_" + &image_name + ".ws";
+                    let file = std::fs::OpenOptions::new()
+                        .create(true)
+                        .write(true)
+                        .truncate(true)
+                        .open(&out_name);
+
+                    match file {
+                        Ok(mut f) => {
+                            _ = f.write_all(&png.get_bytes());
+                        }
+                        Err(e) => eprint!("{}", e),
+                    }
+                }
+                OutputType::Text => {
+                    let out_name = self.name.to_owned() + "_" + &image_name + ".txt";
+                    let file = std::fs::OpenOptions::new()
+                        .create(true)
+                        .write(true)
+                        .truncate(true)
+                        .open(&out_name);
+
+                    match file {
+                        Ok(f) => {
+                            let mut buf_write = BufWriter::new(f);
+
+                            _ = buf_write.write(
+                                format!(
+                                    "width: {}\nheight: {}\nbpp: {}\ndata: ",
+                                    png.width, png.height, png.bpp as u8
+                                )
+                                .as_bytes(),
+                            );
+                            _ = buf_write.write(format!("{:02X?}", &png.bytes).as_bytes());
+                        }
+                        Err(e) => eprint!("{}", e),
+                    }
+                }
+            },
+            Err(e) => eprintln!("{}, continuing with other errors", e),
+        }
+    }
 }
 
 pub enum OutputType {
     Rust,
     Raw,
+    Text,
 }
 
 impl OutputType {
@@ -28,6 +94,7 @@ impl OutputType {
         match from {
             "rs" => OutputType::Rust,
             "raw" => OutputType::Raw,
+            "text" => OutputType::Text,
             _ => panic!("Invalid output type"),
         }
     }

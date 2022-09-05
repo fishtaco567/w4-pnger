@@ -1,0 +1,4 @@
+width: 16
+height: 16
+bpp: 2
+data: [FF, FF, FF, FF, FF, FF, FF, FF, FA, FF, FF, 5F, FA, FF, FF, 5F, FF, FF, FF, FF, FF, FF, FF, FF, FF, FF, FF, FF, FF, FF, FF, FF, FF, FF, FF, FF, FF, FF, FF, FF, FF, F0, 0F, FF, FF, F0, 0F, FF, FF, FF, FF, FF, FF, FF, FF, FF, FF, FF, FF, FF, FF, FF, FF, FF]
