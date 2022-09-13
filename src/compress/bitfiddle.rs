@@ -1,4 +1,4 @@
-#![allow(unused)]
+//#![allow(unused)]
 
 pub struct BitReader<'a> {
     to_read: &'a [u8],
@@ -34,19 +34,30 @@ impl<'a> BitReader<'a> {
     }
 }
 
+pub trait BitWriter {
+    fn write_bit(&mut self, bit: u8);
+    fn write_bit_at(&mut self, bit: u8, bit_pos: usize);
+    fn write(&mut self, val: u32, len: usize);
+    fn read_at(&self, bit_pos: usize) -> Option<bool>;
+    fn swap(&mut self, bit_pos_1: usize, bit_pos_2: usize);
+}
+
+
 #[derive(Debug)]
-pub struct BitWriter<'a> {
+pub struct BitVecWriter<'a> {
     to_write: &'a mut Vec<u8>,
     pos: usize,
 }
 
-impl<'a> BitWriter<'a> {
+impl<'a> BitVecWriter<'a> {
     pub fn new(to_write: &'a mut Vec<u8>) -> Self {
         to_write.clear();
         Self { to_write, pos: 0 }
     }
+}
 
-    pub fn write_bit(&mut self, bit: u8) {
+impl<'a> BitWriter for BitVecWriter<'a> {
+    fn write_bit(&mut self, bit: u8) {
         assert!(bit <= 2);
         let off = self.pos / 8;
         if off >= self.to_write.len() {
@@ -58,7 +69,7 @@ impl<'a> BitWriter<'a> {
         self.pos += 1;
     }
 
-    pub fn write_bit_at(&mut self, bit: u8, bit_pos: usize) {
+    fn write_bit_at(&mut self, bit: u8, bit_pos: usize) {
         assert!(bit <= 2);
         let off = bit_pos / 8;
         if off >= self.to_write.len() {
@@ -73,25 +84,24 @@ impl<'a> BitWriter<'a> {
         self.pos += 1;
     }
 
-    pub fn write(&mut self, val: u32, len: usize) {
+    fn write(&mut self, val: u32, len: usize) {
         for i in (0..len).rev() {
             self.write_bit(((val & (1 << i)) >> i) as u8);
         }
     }
 
-    pub fn read_at(&mut self, bit_pos: usize) -> Option<bool> {
+    fn read_at(&self, bit_pos: usize) -> Option<bool> {
         let off = bit_pos / 8;
         if off >= self.to_write.len() {
             return None;
         }
 
         let read = self.to_write[off] & (1 << (bit_pos % 8)) != 0;
-        self.pos += 1;
 
         return Some(read);
     }
 
-    pub fn swap(&mut self, bit_pos_1: usize, bit_pos_2: usize) {
+    fn swap(&mut self, bit_pos_1: usize, bit_pos_2: usize) {
         let b1 = self.read_at(bit_pos_1).unwrap();
         let b2 = self.read_at(bit_pos_2).unwrap();
 

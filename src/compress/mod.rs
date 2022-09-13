@@ -3,7 +3,7 @@ pub mod pkcomp;
 
 use anyhow::Result;
 
-use self::bitfiddle::{BitReader, BitWriter};
+use self::bitfiddle::{BitReader, BitVecWriter, BitWriter};
 
 pub trait Compressor {
     fn compress(&mut self, png: &Vec<u8>) -> Result<CompressionResult>;
@@ -23,7 +23,7 @@ pub enum CompType {
 }
 
 fn delta_encode(in_bytes: &Vec<u8>, out_bytes: &mut Vec<u8>) {
-    let mut writer = BitWriter::new(out_bytes);
+    let mut writer = BitVecWriter::new(out_bytes);
 
     let mut reader = BitReader::new(in_bytes);
 
@@ -46,7 +46,7 @@ fn delta_encode(in_bytes: &Vec<u8>, out_bytes: &mut Vec<u8>) {
 }
 
 fn delta_decode(in_bytes: &Vec<u8>, out_bytes: &mut Vec<u8>) {
-    let mut writer = BitWriter::new(out_bytes);
+    let mut writer = BitVecWriter::new(out_bytes);
 
     let mut reader = BitReader::new(in_bytes);
 
@@ -66,7 +66,7 @@ fn delta_decode(in_bytes: &Vec<u8>, out_bytes: &mut Vec<u8>) {
 }
 
 pub fn delta_encode_by_jump(in_bytes: &Vec<u8>, out_bytes: &mut Vec<u8>, jump: usize) {
-    let mut writer = BitWriter::new(out_bytes);
+    let mut writer = BitVecWriter::new(out_bytes);
 
     let mut reader = BitReader::new(in_bytes);
 
@@ -88,8 +88,8 @@ pub fn delta_encode_by_jump(in_bytes: &Vec<u8>, out_bytes: &mut Vec<u8>, jump: u
 }
 
 fn split_bitplanes(in_bytes: &Vec<u8>, out_left: &mut Vec<u8>, out_right: &mut Vec<u8>) {
-    let mut writer_1 = BitWriter::new(out_left);
-    let mut writer_2 = BitWriter::new(out_right);
+    let mut writer_1 = BitVecWriter::new(out_left);
+    let mut writer_2 = BitVecWriter::new(out_right);
 
     let mut reader = BitReader::new(&in_bytes);
 

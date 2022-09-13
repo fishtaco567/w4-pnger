@@ -1,7 +1,7 @@
 use std::{fmt::Debug};
 
 use super::{
-    bitfiddle::{BitReader, BitWriter},
+    bitfiddle::{BitReader, BitVecWriter, BitWriter},
     delta_encode, delta_encode_by_jump, split_bitplanes, xor_bitplanes,
     CompressionResult, Compressor,
 };
@@ -135,7 +135,7 @@ fn compress_bitplane(
     let mut reader = BitReader::new(&bytes);
 
     let mut out_vec: Vec<u8> = Vec::new();
-    let mut writer = BitWriter::new(&mut out_vec);
+    let mut writer = BitVecWriter::new(&mut out_vec);
 
     let b1 = reader.read_bit().unwrap();
     let b2 = reader.read_bit().unwrap();
@@ -194,7 +194,7 @@ fn compress_bitplane(
     out_vec
 }
 
-fn write(prev_state: State, writer: &mut BitWriter) {
+fn write(prev_state: State, writer: &mut BitVecWriter) {
     match prev_state {
         State::Zeroes(n) => {
             let n = n + 1;
