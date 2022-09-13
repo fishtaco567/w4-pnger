@@ -1,12 +1,12 @@
 use std::{fmt::Debug};
 
 use super::{
-    bitfiddle::{BitReader, BitVecWriter, BitWriter},
     delta_encode, delta_encode_by_jump, split_bitplanes, xor_bitplanes,
     CompressionResult, Compressor,
 };
 
 use anyhow::Result;
+use tiny_bitfiddle::{BitReader, BitVecWriter, BitWriter};
 
 pub struct PkComp;
 

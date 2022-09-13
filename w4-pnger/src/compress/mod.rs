@@ -1,9 +1,7 @@
-mod bitfiddle;
 pub mod pkcomp;
 
 use anyhow::Result;
-
-use self::bitfiddle::{BitReader, BitVecWriter, BitWriter};
+use tiny_bitfiddle::{BitVecWriter, BitReader, BitWriter};
 
 pub trait Compressor {
     fn compress(&mut self, png: &Vec<u8>) -> Result<CompressionResult>;
