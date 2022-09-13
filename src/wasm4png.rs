@@ -1,11 +1,10 @@
-use core::slice;
 use std::{collections::HashMap, convert::TryInto, fs::File, hash::Hash};
 
 use anyhow::{bail, Result};
 use png::{BitDepth, ColorType, OutputInfo, Reader};
 
 pub struct W4Sprite {
-    pub bytes: Vec<u8>,
+    bytes: Vec<u8>,
     pub width: u16,
     pub height: u16,
     pub bpp: BitsPerPixel,
@@ -53,15 +52,6 @@ impl W4Sprite {
             png::ColorType::Rgba => get_palette_bpp(&info, &png, 4).unwrap(),
         };
         //Reimplementation of Aduros' png packing in WASM-4
-
-        let factor = 8 / bpp.get_num();
-        if info.width & factor != 0 {
-            bail!(
-                "{}BPP sprites must have a width divisible by {}",
-                bpp.get_num(),
-                factor
-            );
-        }
 
         let mut out_bytes: Vec<u8> =
             vec![0; (info.width * info.height * bpp.get_num() / 8) as usize];

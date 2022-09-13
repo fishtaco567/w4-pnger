@@ -1,6 +1,7 @@
 use clap::{arg, AppSettings, ArgAction, ArgGroup, Command};
 
 mod analyze;
+mod compress;
 mod convert;
 mod pngstream;
 mod wasm4png;

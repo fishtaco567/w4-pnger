@@ -1,1 +1,6 @@
+# generated files
 /target
+
+# binary files
+*.png
+*.ws
