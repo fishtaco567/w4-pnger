@@ -178,11 +178,11 @@ checksum = "b1141d4d61095b28419e22cb0bbf02755f5e54e0526f97f1e3d1d160e60885fb"
 
 [[package]]
 name = "tiny-bitfiddle"
-version = "0.1.0"
+version = "1.0.0"
 
 [[package]]
 name = "w4-pnger"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "clap",
@@ -199,7 +199,7 @@ version = "0.1.0"
 
 [[package]]
 name = "w4-tiny-decomp"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "tiny-bitfiddle",
  "w4-pnger-common",
