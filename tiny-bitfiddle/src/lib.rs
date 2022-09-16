@@ -1,4 +1,4 @@
-//#![allow(unused)]
+#[cfg_attr(not(feature = "std"), no_std)]
 
 pub struct BitReader<'a> {
     to_read: &'a [u8],
@@ -52,11 +52,13 @@ pub trait BitWriter {
     fn swap(&mut self, bit_pos_1: usize, bit_pos_2: usize);
 }
 
+#[cfg(feature = "std")]
 pub struct BitVecWriter<'a> {
     to_write: &'a mut Vec<u8>,
     pos: usize,
 }
 
+#[cfg(feature = "std")]
 impl<'a> BitVecWriter<'a> {
     pub fn new(to_write: &'a mut Vec<u8>) -> Self {
         to_write.clear();
@@ -64,6 +66,7 @@ impl<'a> BitVecWriter<'a> {
     }
 }
 
+#[cfg(feature = "std")]
 impl<'a> BitWriter for BitVecWriter<'a> {
     fn write_bit(&mut self, bit: u8) {
         debug_assert!(bit <= 2);
