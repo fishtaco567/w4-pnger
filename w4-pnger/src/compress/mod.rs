@@ -1,7 +1,7 @@
 pub mod pkcomp;
 
 use anyhow::Result;
-use tiny_bitfiddle::{BitVecWriter, BitReader, BitWriter};
+use tiny_bitfiddle::{BitReader, BitVecWriter, BitWriter};
 
 pub trait Compressor {
     fn compress(&mut self, png: &Vec<u8>) -> Result<CompressionResult>;
@@ -12,12 +12,6 @@ pub struct CompressionResult {
     pub header_bytes: Vec<u8>,
     pub total_size: usize,
     pub readable_compression_name: String,
-}
-
-#[repr(u8)]
-pub enum CompType {
-    Uncompressed,
-    Pk,
 }
 
 fn delta_encode(in_bytes: &Vec<u8>, out_bytes: &mut Vec<u8>) {
@@ -40,26 +34,6 @@ fn delta_encode(in_bytes: &Vec<u8>, out_bytes: &mut Vec<u8>) {
         }
 
         last = b1;
-    }
-}
-
-fn delta_decode(in_bytes: &Vec<u8>, out_bytes: &mut Vec<u8>) {
-    let mut writer = BitVecWriter::new(out_bytes);
-
-    let mut reader = BitReader::new(in_bytes);
-
-    let mut cur = 0;
-
-    loop {
-        let b1 = match reader.read_bit() {
-            Some(b) => b,
-            None => break,
-        };
-
-        if b1 {
-            cur = 1 - cur;
-        }
-        _ = writer.write_bit(cur);
     }
 }
 

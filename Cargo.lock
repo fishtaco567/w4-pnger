@@ -189,6 +189,20 @@ dependencies = [
  "glob",
  "png",
  "tiny-bitfiddle",
+ "w4-pnger-common",
+ "w4-tiny-decomp",
+]
+
+[[package]]
+name = "w4-pnger-common"
+version = "0.1.0"
+
+[[package]]
+name = "w4-tiny-decomp"
+version = "0.1.0"
+dependencies = [
+ "tiny-bitfiddle",
+ "w4-pnger-common",
 ]
 
 [[package]]

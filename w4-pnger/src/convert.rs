@@ -1,9 +1,10 @@
 use png::Reader;
 use std::fs::File;
 use std::io::{BufWriter, Write};
+use w4_pnger_common::CompType;
 
 use crate::compress::pkcomp::PkComp;
-use crate::compress::{CompType, Compressor};
+use crate::compress::Compressor;
 use crate::pngstream::PngStream;
 use crate::wasm4png::W4Sprite;
 
@@ -55,11 +56,13 @@ impl<'a> Converter<'a> {
                     );
 
                     let mut out = vec![CompType::Pk as u8];
+                    out.append(&mut png.get_header_bytes());
                     out.append(&mut compressed.header_bytes);
                     out.append(&mut compressed.content_bytes);
                     out
                 } else {
                     let mut out = vec![CompType::Uncompressed as u8];
+                    out.append(&mut png.get_header_bytes());
                     out.append(&mut png_bytes.clone());
                     out
                 };

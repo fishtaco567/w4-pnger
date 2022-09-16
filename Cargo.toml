@@ -1,5 +1,7 @@
 [workspace]
 members = [
     "w4-pnger",
-    "tiny-bitfiddle"
+    "tiny-bitfiddle",
+    "w4-tiny-decomp",
+    "w4-pnger-common",
 ]

@@ -1,8 +1,8 @@
-use std::{fmt::Debug};
+use std::fmt::Debug;
 
 use super::{
-    delta_encode, delta_encode_by_jump, split_bitplanes, xor_bitplanes,
-    CompressionResult, Compressor,
+    delta_encode, delta_encode_by_jump, split_bitplanes, xor_bitplanes, CompressionResult,
+    Compressor,
 };
 
 use anyhow::Result;
@@ -22,7 +22,7 @@ impl Compressor for PkComp {
         let mut best_size = 0;
 
         for split in 0..=1 {
-            for xor in 0..=1 {
+            for xor in 0..=split {
                 for seq_delta in 0..=4 {
                     for jump_delta in 0..=2 {
                         for jump_size in (4..=32).step_by(2) {
@@ -88,23 +88,20 @@ fn compress_for(
             xor_bitplanes(&bitplane_2, &mut bitplane_1);
         }
 
-        let mut out_bp1 = compress_bitplane(
-            &mut bitplane_1,
-            seq_delta_encode,
-            jump_delta_encode,
-            jump_delta_encode_size,
-        );
-        let mut out_bp2 = compress_bitplane(
-            &mut bitplane_2,
+        let mut to_comp = Vec::new();
+        to_comp.append(&mut bitplane_1);
+        to_comp.append(&mut bitplane_2);
+
+        let mut out_bytes = compress_bytes(
+            &mut to_comp,
             seq_delta_encode,
             jump_delta_encode,
             jump_delta_encode_size,
         );
 
-        out_bp1.append(&mut out_bp2);
-        out_vec.append(&mut out_bp1);
+        out_vec.append(&mut out_bytes);
     } else {
-        out_vec.append(&mut compress_bitplane(
+        out_vec.append(&mut compress_bytes(
             &mut cloned,
             seq_delta_encode,
             jump_delta_encode,
@@ -115,7 +112,7 @@ fn compress_for(
     out_vec
 }
 
-fn compress_bitplane(
+fn compress_bytes(
     bytes: &mut Vec<u8>,
     seq_delta_encode: usize,
     jump_delta_encode: usize,
@@ -146,6 +143,11 @@ fn compress_bitplane(
         (false, false) => State::Zeroes(1),
     };
 
+    match state {
+        State::Zeroes(_) => writer.write_bit(0),
+        State::Root(_, _, _) => writer.write_bit(1),
+    }
+
     loop {
         let b1 = match reader.read_bit() {
             Some(b) => b,
@@ -172,7 +174,12 @@ fn compress_bitplane(
                 (false, false) => {
                     if i == 1 && (lb1, lb2) != (true, true) {
                         writer.write_bit(0);
-                        writer.write_bit((b1 == true) as u8);
+                        writer.write_bit(lb1 as u8);
+                    } else if i == 1 && (lb1, lb2) == (true, true) {
+                        writer.write_bit(1);
+                        write(state, &mut writer);
+                        writer.write_bit(0);
+                        writer.write_bit(0);
                     } else {
                         write(state, &mut writer);
                         writer.write_bit(0);
@@ -227,4 +234,39 @@ fn highest_bit(mut n: usize) -> usize {
 enum State {
     Zeroes(usize),
     Root(bool, bool, usize),
+}
+
+mod tests {
+    use w4_pnger_common::CompType;
+    use w4_tiny_decomp::Decompressor;
+
+    use crate::{compress::Compressor, pngstream::PngStream, wasm4png::W4Sprite};
+
+    use super::PkComp;
+
+    #[test]
+    fn test_comp_decomp() {
+        let mut comp = PkComp {};
+
+        let mut png_s = PngStream::new("C:/Users/tgame/Game Work/W4Games/w4-utilities/test.png");
+
+        let (name, mut reader) = png_s.next().unwrap().unwrap();
+
+        let w4sprite = W4Sprite::from_reader(&mut reader).unwrap();
+
+        let bytes = w4sprite.get_bytes();
+        let mut compressed = comp.compress(&bytes).unwrap();
+
+        let mut decomp_buf = vec![0u8; bytes.len() * 2];
+        let mut decomp = Decompressor::new(&mut decomp_buf[..]);
+
+        let mut assembled = Vec::new();
+        assembled.push(CompType::Pk as u8);
+        assembled.append(&mut w4sprite.get_header_bytes());
+        assembled.append(&mut compressed.header_bytes);
+        assembled.append(&mut compressed.content_bytes);
+        let decompressed = decomp.decompress(&assembled[..]).unwrap();
+
+        assert_eq!(decompressed.bytes, bytes);
+    }
 }

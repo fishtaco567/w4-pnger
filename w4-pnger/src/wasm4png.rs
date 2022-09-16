@@ -2,6 +2,7 @@ use std::{collections::HashMap, convert::TryInto, fs::File, hash::Hash};
 
 use anyhow::{bail, Result};
 use png::{BitDepth, ColorType, OutputInfo, Reader};
+use w4_pnger_common::BitsPerPixel;
 
 pub struct W4Sprite {
     bytes: Vec<u8>,
@@ -93,13 +94,14 @@ impl W4Sprite {
     }
 
     pub fn get_bytes(&self) -> Vec<u8> {
-        let mut out = Vec::with_capacity(self.bytes.len() + 4 + 4 + 1);
-        out.extend_from_slice(&self.width.to_be_bytes());
-        out.extend_from_slice(&self.height.to_be_bytes());
-        out.push(self.bpp.get_flags());
+        let mut out = Vec::with_capacity(self.bytes.len());
         out.extend_from_slice(&self.bytes);
 
         out
+    }
+
+    pub fn get_header_bytes(&self) -> Vec<u8> {
+        vec![self.width as u8, self.height as u8, self.bpp.get_flags()]
     }
 }
 
@@ -260,27 +262,5 @@ fn bit_depth_to_bytes(bit_depth: BitDepth) -> usize {
         BitDepth::Four => 1,
         BitDepth::Eight => 1,
         BitDepth::Sixteen => 2,
-    }
-}
-
-#[repr(u8)]
-pub enum BitsPerPixel {
-    One = 1,
-    Two = 2,
-}
-
-impl BitsPerPixel {
-    fn get_num(&self) -> u32 {
-        match self {
-            BitsPerPixel::One => 1,
-            BitsPerPixel::Two => 2,
-        }
-    }
-
-    fn get_flags(&self) -> u8 {
-        match self {
-            BitsPerPixel::One => 0,
-            BitsPerPixel::Two => 1,
-        }
     }
 }
