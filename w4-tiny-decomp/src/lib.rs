@@ -1,7 +1,7 @@
-//#![cfg_attr(not(test), no_std)]
+#![cfg_attr(not(test), no_std)]
 
 mod pkdecomp;
-use std::convert::TryInto;
+use core::convert::TryInto;
 
 pub use pkdecomp::*;
 

@@ -9,7 +9,7 @@ pub fn decompress<'a>(
 ) -> Result<SpriteHandle<'a>, &'static str> {
     let width = bytes[0] as usize;
     let height = bytes[1] as usize;
-    let flags = dbg!(bytes[2]);
+    let flags = bytes[2];
     let split = bytes[3] & (1 << 0) == 1;
     let xor = bytes[3] & (1 << 1) != 0;
     let seq_delta = (bytes[3] & 0b00111100) >> 2;
@@ -109,7 +109,7 @@ pub fn decompress<'a>(
             }
         }
     }
-    println!("{}", flags);
+    
     let byte_end = match BitsPerPixel::try_from_flags(flags)? {
         BitsPerPixel::One => (width * height) / 8,
         BitsPerPixel::Two => (width * height) / 4,
