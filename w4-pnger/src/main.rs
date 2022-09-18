@@ -22,9 +22,7 @@ fn main() {
             let compress: bool = *submatches.get_one("compress").expect("defaulted by clap");
 
             let (output_type, output_file) =
-                if let Some(output_file) = submatches.get_one::<String>("rs") {
-                    ("rust", output_file.as_str())
-                } else if let Some(output_file) = submatches.get_one::<String>("raw") {
+                if let Some(output_file) = submatches.get_one::<String>("raw") {
                     ("raw", output_file.as_str())
                 } else if let Some(output_file) = submatches.get_one::<String>("text") {
                     ("text", output_file.as_str())
@@ -57,7 +55,6 @@ fn cmd() -> Command<'static> {
         .subcommand(
             Command::new("convert")
                 .arg(arg!(-c --compress "Compress these files?").action(ArgAction::SetTrue))
-                .arg(arg!(--rs <FILE> "Generate a rust file with sprites"))
                 .arg(arg!(--raw <FILE> "Generate a raw file with sprites"))
                 .arg(arg!(--text <FILE> "Generate a text file with sprites"))
                 .group(
@@ -67,7 +64,7 @@ fn cmd() -> Command<'static> {
                 )
                 .arg(arg!([PATH]).required(true)),
         )
-        .subcommand(Command::new("analyze").arg(arg!([PATH]).required(true)))
+        //.subcommand(Command::new("analyze").arg(arg!([PATH]).required(true)))
 }
 
 #[test]
