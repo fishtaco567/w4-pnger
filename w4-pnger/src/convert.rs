@@ -68,14 +68,10 @@ impl<'a> Converter<'a> {
                 };
 
                 match self.out_type {
-                    OutputType::Rust => {}
                     OutputType::Raw => {
                         let out_name = self.name.to_owned() + "_" + &image_name + ".ws";
-                        let file = std::fs::OpenOptions::new()
-                            .create(true)
-                            .write(true)
-                            .truncate(true)
-                            .open(&out_name);
+
+                        let file = open_output_file(&out_name);
 
                         match file {
                             Ok(mut f) => {
@@ -86,11 +82,8 @@ impl<'a> Converter<'a> {
                     }
                     OutputType::Text => {
                         let out_name = self.name.to_owned() + "_" + &image_name + ".txt";
-                        let file = std::fs::OpenOptions::new()
-                            .create(true)
-                            .write(true)
-                            .truncate(true)
-                            .open(&out_name);
+
+                        let file = open_output_file(&out_name);
 
                         match file {
                             Ok(f) => {
@@ -116,7 +109,6 @@ impl<'a> Converter<'a> {
 }
 
 pub enum OutputType {
-    Rust,
     Raw,
     Text,
 }
@@ -124,10 +116,17 @@ pub enum OutputType {
 impl OutputType {
     pub fn from_str(from: &str) -> OutputType {
         match from {
-            "rs" => OutputType::Rust,
             "raw" => OutputType::Raw,
             "text" => OutputType::Text,
             _ => panic!("Invalid output type"),
         }
     }
+}
+
+fn open_output_file(path: &str) -> Result<File, std::io::Error> {
+    std::fs::OpenOptions::new()
+        .create(true)
+        .write(true)
+        .truncate(true)
+        .open(path)
 }
