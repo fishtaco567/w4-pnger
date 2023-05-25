@@ -1,4 +1,4 @@
-use clap::{arg, AppSettings, ArgAction, ArgGroup, Command};
+use clap::{arg, ArgAction, ArgGroup, Command};
 
 mod analyze;
 mod compress;
@@ -39,19 +39,21 @@ fn main() {
             )
             .run();
         }
-        Some(("analyze", submatches)) => todo!(),
+        Some(("analyze", submatches)) => {
+
+        },
 
         //clap will exit the program if a valid subcommand is not reached
         _ => unreachable!(),
     }
 }
 
-fn cmd() -> Command<'static> {
+fn cmd() -> Command {
     Command::new("w4-png")
         .version("0.1")
         .author("Maddie Jaksa")
         .about("Png compression and data generation tool for WASM-4")
-        .setting(AppSettings::SubcommandRequiredElseHelp)
+        .arg_required_else_help(true)
         .subcommand(
             Command::new("convert")
                 .arg(arg!(-c --compress "Compress these files?").action(ArgAction::SetTrue))
@@ -60,7 +62,7 @@ fn cmd() -> Command<'static> {
                 .group(
                     ArgGroup::new("output")
                         .required(true)
-                        .args(&["rs", "raw", "text"]),
+                        .args(&["raw", "text"]),
                 )
                 .arg(arg!([PATH]).required(true)),
         )
