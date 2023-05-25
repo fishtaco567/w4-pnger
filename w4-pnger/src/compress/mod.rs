@@ -4,7 +4,7 @@ use anyhow::Result;
 use tiny_bitfiddle::{BitReader, BitVecWriter, BitWriter};
 
 pub trait Compressor {
-    fn compress(&mut self, png: &Vec<u8>) -> Result<CompressionResult>;
+    fn compress(&self, png: &Vec<u8>) -> Result<CompressionResult>;
 }
 
 pub struct CompressionResult {
@@ -12,6 +12,7 @@ pub struct CompressionResult {
     pub header_bytes: Vec<u8>,
     pub total_size: usize,
     pub readable_compression_name: String,
+    pub readable_compression_statistics: String,
 }
 
 fn delta_encode(in_bytes: &Vec<u8>, out_bytes: &mut Vec<u8>) {

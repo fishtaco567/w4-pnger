@@ -6,7 +6,7 @@ use core::convert::TryInto;
 pub use pkdecomp::*;
 
 use tiny_bitfiddle::{BitSliceWriter, BitWriter};
-use w4_pnger_common::{BitsPerPixel, CompType};
+use w4_pnger_common::CompType;
 
 pub struct Decompressor<'a> {
     pub(crate) buf: &'a mut [u8],
@@ -25,14 +25,9 @@ impl<'a> Decompressor<'a> {
                 let width = bytes[1];
                 let height = bytes[2];
                 let flags = bytes[3];
-
-                let length = match BitsPerPixel::try_from_flags(flags)? {
-                    BitsPerPixel::One => (width as usize * height as usize) / 8,
-                    BitsPerPixel::Two => (width as usize * height as usize) / 4,
-                };
-
+                
                 Ok(SpriteHandle {
-                    bytes: &self.buf,
+                    bytes: &self.buf[4..],
                     width,
                     height,
                     flags,

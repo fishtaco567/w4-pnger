@@ -1,4 +1,4 @@
-use clap::{arg, ArgAction, ArgGroup, Command};
+use clap::{arg, ArgAction, ArgGroup, ArgMatches, Command};
 
 mod analyze;
 mod compress;
@@ -14,22 +14,19 @@ fn main() {
 
     match matches.subcommand() {
         Some(("convert", submatches)) => {
-            let path = submatches
-                .get_one::<String>("PATH")
-                .expect("clap requires this argument to be present")
-                .as_str();
+            let path = get_path(&submatches);
 
             let compress: bool = *submatches.get_one("compress").expect("defaulted by clap");
 
-            let (output_type, output_file) =
-                if let Some(output_file) = submatches.get_one::<String>("raw") {
-                    ("raw", output_file.as_str())
-                } else if let Some(output_file) = submatches.get_one::<String>("text") {
-                    ("text", output_file.as_str())
-                } else {
-                    //clap requires either --rs or --raw or --text are set with the appropriate parameter passed
-                    unreachable!()
-                };
+            let (output_type, output_file) = if let Some(output_file) =
+                submatches.get_one::<String>("raw")
+            {
+                ("raw", output_file.as_str())
+            } else if let Some(output_file) = submatches.get_one::<String>("text") {
+                ("text", output_file.as_str())
+            } else {
+                unreachable!("clap requires either --rs or --raw or --text are set with the appropriate parameter passed")
+            };
 
             Converter::new(
                 path,
@@ -40,11 +37,12 @@ fn main() {
             .run();
         }
         Some(("analyze", submatches)) => {
+            let path = get_path(&submatches);
 
-        },
+            Analyzer::new(path).run();
+        }
 
-        //clap will exit the program if a valid subcommand is not reached
-        _ => unreachable!(),
+        _ => unreachable!("clap will exit the program if a valid subcommand is not reached"),
     }
 }
 
@@ -56,6 +54,7 @@ fn cmd() -> Command {
         .arg_required_else_help(true)
         .subcommand(
             Command::new("convert")
+                .about("Converts a .png file for use with WASM-4")
                 .arg(arg!(-c --compress "Compress these files?").action(ArgAction::SetTrue))
                 .arg(arg!(--raw <FILE> "Generate a raw file with sprites"))
                 .arg(arg!(--text <FILE> "Generate a text file with sprites"))
@@ -66,7 +65,18 @@ fn cmd() -> Command {
                 )
                 .arg(arg!([PATH]).required(true)),
         )
-        //.subcommand(Command::new("analyze").arg(arg!([PATH]).required(true)))
+        .subcommand(
+            Command::new("analyze")
+                .about("Analyzes a .png file and reports its compression statistics")
+                .arg(arg!([PATH]).required(true)),
+        )
+}
+
+fn get_path(matches: &ArgMatches) -> &str {
+    matches
+        .get_one::<String>("PATH")
+        .expect("clap requires this argument to be present")
+        .as_str()
 }
 
 #[test]

@@ -11,7 +11,7 @@ use tiny_bitfiddle::{BitReader, BitVecWriter, BitWriter};
 pub struct PkComp;
 
 impl Compressor for PkComp {
-    fn compress(&mut self, png: &Vec<u8>) -> Result<CompressionResult> {
+    fn compress(&self, png: &Vec<u8>) -> Result<CompressionResult> {
         let mut best = None;
         let mut best_score = usize::MAX;
 
@@ -19,7 +19,7 @@ impl Compressor for PkComp {
         let mut best_xor = false;
         let mut best_seq = 0;
         let mut best_jump = 0;
-        let mut best_size = 0;
+        let mut best_jump_size = 0;
 
         for split in 0..=1 {
             for xor in 0..=split {
@@ -42,7 +42,7 @@ impl Compressor for PkComp {
                                 best_xor = xor != 0;
                                 best_seq = seq_delta;
                                 best_jump = jump_delta;
-                                best_size = jump_size;
+                                best_jump_size = jump_size;
                             }
                         }
                     }
@@ -50,7 +50,7 @@ impl Compressor for PkComp {
             }
         }
 
-        let mut out_header = vec![0, best_size as u8];
+        let mut out_header = vec![0, best_jump_size as u8];
         out_header[0] |= if best_split { 1 << 0 } else { 0 };
         out_header[0] |= if best_xor { 1 << 1 } else { 0 };
         out_header[0] |= (best_seq as u8) << 2;
@@ -64,6 +64,8 @@ impl Compressor for PkComp {
             header_bytes: out_header,
             total_size: len,
             readable_compression_name: "PnTree".to_owned(),
+            readable_compression_statistics: format!("split bitplanes={best_split}, xor bitplanes={best_xor}, delta-encoded {best_seq} times, \
+                jump delta-encoded {best_jump} times with {best_jump_size} pixel jump").to_owned()
         })
     }
 }
@@ -236,6 +238,7 @@ enum State {
     Root(bool, bool, usize),
 }
 
+#[cfg(test)]
 mod tests {
     use w4_pnger_common::CompType;
     use w4_tiny_decomp::Decompressor;
@@ -246,9 +249,9 @@ mod tests {
 
     #[test]
     fn test_comp_decomp() {
-        let mut comp = PkComp {};
+        let comp = PkComp {};
 
-        let mut png_s = PngStream::new("C:/Users/tgame/Game Work/W4Games/w4-utilities/test.png");
+        let mut png_s = PngStream::new("../test.png");
 
         let (name, mut reader) = png_s.next().unwrap().unwrap();
 

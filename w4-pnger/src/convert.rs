@@ -43,7 +43,7 @@ impl<'a> Converter<'a> {
                 let png_bytes = png.get_bytes();
 
                 let out_bytes = if self.compress {
-                    let mut compressor = PkComp {};
+                    let compressor = PkComp {};
                     let mut compressed = compressor.compress(&png_bytes).unwrap();
 
                     println!(
@@ -110,7 +110,7 @@ impl<'a> Converter<'a> {
                     }
                 }
             }
-            Err(e) => eprintln!("{}, continuing with other errors", e),
+            Err(e) => eprintln!("Encountered error processing sprite {image_name}: {e}"),
         }
     }
 }

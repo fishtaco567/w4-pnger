@@ -109,7 +109,7 @@ pub fn decompress<'a>(
             }
         }
     }
-    
+
     let byte_end = match BitsPerPixel::try_from_flags(flags)? {
         BitsPerPixel::One => (width * height) / 8,
         BitsPerPixel::Two => (width * height) / 4,
